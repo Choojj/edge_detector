@@ -47,8 +47,8 @@ def diff_clip(imageA, imageB): # roi에서 차영상 추출
     blank_imageA = cv2.cvtColor(blank_imageA, cv2.COLOR_BGR2GRAY)
     blank_imageB = cv2.cvtColor(blank_imageB, cv2.COLOR_BGR2GRAY)
 
-    ret, resultA = cv2.threshold(grayA, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    ret, resultB = cv2.threshold(grayB, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    ret, resultA = cv2.threshold(grayA, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret, resultB = cv2.threshold(grayB, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     resultA_y, resultA_x = resultA.shape
     resultB_y, resultB_x = resultB.shape

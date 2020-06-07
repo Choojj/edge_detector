@@ -184,6 +184,3 @@ for i in range(4):
 cv2.imshow("right_text_image", right_text_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-txt = pytesseract.image_to_string(right_text_image) #config = '--psm 13')
-print(txt)
