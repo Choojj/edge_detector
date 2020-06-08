@@ -51,13 +51,18 @@ def text_extraction(path):
         # cv2.imshow("result", dst)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
+
+        mmt = cv2.moments(cnt)
+        text_x = int(mmt["m10"] / mmt["m00"])
+        text_y = int(mmt["m01"] / mmt["m00"])
+        text_center = (text_x, text_y)
     
-    return dst
+    return dst, text_center
 
 
-path = "C:/Users/HSWB/Desktop/edge_detector/ocr/data/rotation_165.png"
+path = "C:/Users/HSWB/Desktop/edge_detector/ocr/data/rotation_0.png"
 
-image = text_extraction(path)
+image, text_center = text_extraction(path)
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 # cv2.imshow("gray", gray)
@@ -89,13 +94,13 @@ rotated2 = cv2.warpAffine(rotated1, M, (w, h), flags = cv2.INTER_CUBIC, borderMo
 rotated3 = cv2.warpAffine(rotated2, M, (w, h), flags = cv2.INTER_CUBIC, borderMode = cv2.BORDER_REPLICATE)
 rotated4 = cv2.warpAffine(rotated3, M, (w, h), flags = cv2.INTER_CUBIC, borderMode = cv2.BORDER_REPLICATE)
 
-cv2.imshow("Input", image)
-cv2.imshow("Rotated1", rotated1)
-cv2.imshow("Rotated2", rotated2)
-cv2.imshow("Rotated3", rotated3)
-cv2.imshow("Rotated4", rotated4)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.imshow("Input", image)
+# cv2.imshow("Rotated1", rotated1)
+# cv2.imshow("Rotated2", rotated2)
+# cv2.imshow("Rotated3", rotated3)
+# cv2.imshow("Rotated4", rotated4)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 rotated = [rotated1, rotated2, rotated3, rotated4]
 
@@ -105,32 +110,32 @@ for i in range(4):
         break
 
     image = rotated[i]
-    cv2.imshow("image", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("image", image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cv2.imshow("gray", gray)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("gray", gray)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     invert = cv2.bitwise_not(gray)
-    cv2.imshow("invert", invert)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("invert", invert)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     thresh = cv2.threshold(invert, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-    cv2.imshow("thresh", thresh)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("thresh", thresh)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     x, y, w, h = cv2.boundingRect(contours[0])
     alphabet = image.copy() 
     alphabet = image[y:y + h, x:x + w]
-    cv2.imshow("alphabet", alphabet)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("alphabet", alphabet)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     blank_image = np.zeros((35, 35, 3), np.uint8)
     blank_imageA = cv2.bitwise_not(blank_image)
@@ -157,13 +162,13 @@ for i in range(4):
         absdiff = cv2.absdiff(blank_imageA, blank_imageB)
 
         contours, hierarchy = cv2.findContours(absdiff, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        print(j)
+        # print(j)
 
         
         same = True
         for cnt in enumerate(contours):
             area = cv2.contourArea(cnt[1])
-            print(cnt[0], area)
+            # print(cnt[0], area)
             if (area > 5):
                 same = False
                 break
@@ -173,17 +178,17 @@ for i in range(4):
             break_trig2 = True
 
             right_text_image = rotated[i]
-            print("SAME!!!!")
+            # print("SAME!!!!")
             
-        cv2.imshow("blank_imageA", blank_imageA)
-        cv2.imshow("blank_imageB", blank_imageB)
-        cv2.imshow("absdiff", absdiff)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow("blank_imageA", blank_imageA)
+        # cv2.imshow("blank_imageB", blank_imageB)
+        # cv2.imshow("absdiff", absdiff)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
-cv2.imshow("right_text_image", right_text_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.imshow("right_text_image", right_text_image)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 txt = pytesseract.image_to_string(right_text_image) #config = '--psm 13')
-print(txt)
+print(path, txt, text_center, angle, i)
