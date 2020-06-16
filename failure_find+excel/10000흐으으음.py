@@ -98,7 +98,8 @@ path = ["C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/original_0
         "C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/modified_15.png", "C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/modified_16.png",
         "C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/modified_17.png", "C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/modified_18.png",]
 
-failure_count = [["양품", 0], ["길이높이감소", 0], ["길이높이증가", 0], ["길이폭감소", 0], ["길이폭증가", 0], ["균일함몰", 0], ["균일돌출", 0], ["비균일함몰", 0], ["비균일돌출", 0], ["채움", 0], ["구멍", 0]]
+failure_sum = 0
+failure_count = [["양품", 0, 0, 0], ["길이높이감소", 0, 0, 0], ["길이높이증가", 0, 0, 0], ["길이폭감소", 0, 0, 0], ["길이폭증가", 0, 0, 0], ["균일함몰", 0, 0, 0], ["균일돌출", 0, 0, 0], ["비균일함몰", 0, 0, 0], ["비균일돌출", 0, 0, 0], ["채움", 0, 0, 0], ["구멍", 0, 0, 0]]
 
 #ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ 변수 초기화
 
@@ -366,6 +367,9 @@ for repeat in range(100):
         print(f"{failure_mode}, 구멍")
 
     failure_count[failure_mode][1] += 1 # 불량 종류별 개수
+    
+    if (failure_mode != 0):
+        failure_sum += 1
 
     const = 0.6 # 사진크기 너무 커서 줄임
     blankA = cv2.resize(blankA, dsize = (0, 0), fx = const, fy = const, interpolation = cv2.INTER_AREA)
@@ -439,53 +443,42 @@ workbook = openpyxl.load_workbook("C:/Users/HSWB/Desktop/edge_detector/failure_f
 sheet1 = workbook.active
 
 sheet2 = workbook.create_sheet("result")
+sheet2.column_dimensions["A"].width = 12
 
 del failure_count[0]
-count_sum = 0
-for i in failure_count:
-    sheet2.append(i)
-    count_sum += i[1]
-
-data = openpyxl.chart.Reference(sheet2, min_col = 2, min_row = 1, max_col = 2, max_row = 10)
-cats = openpyxl.chart.Reference(sheet2, min_col = 1, min_row = 1, max_row = 10)
-
-chart = openpyxl.chart.BarChart()
-chart.add_data(data = data)
-chart.set_categories(cats)
-
-chart.legend = None
-chart.y_axis.majorGridlines = None
-chart.varyColors = True
-chart.title = "불량품 구분"
-# chart.x_axis.title = "불량종류"
-# chart.y_axis.title = "불량개수"
-
-sheet2.add_chart(chart, "A1")
-
 failure_count.sort(reverse = True, key = lambda x:x[1])
 
 running_total = 0
 for i in failure_count:
-    running_total += (i[1] / count_sum) * 100
-    i[1] = running_total
-
-for i in failure_count:
+    i[2] = i[1] / failure_sum * 100
+    running_total += i[2]
+    i[3] = running_total
     sheet2.append(i)
 
-data = openpyxl.chart.Reference(sheet2, min_col = 2, min_row = 11, max_col = 2, max_row = 21)
-cats = openpyxl.chart.Reference(sheet2, min_col = 1, min_row = 11, max_row = 21)
+data = openpyxl.chart.Reference(sheet2, min_col = 2, min_row = 1, max_row = 10)
+cats = openpyxl.chart.Reference(sheet2, min_col = 1, min_row = 1, max_row = 10)
 
-chart = openpyxl.chart.LineChart()
-chart.add_data(data = data)
-chart.set_categories(cats)
+chart1 = openpyxl.chart.BarChart()
+chart1.add_data(data = data)
+chart1.set_categories(cats)
 
-chart.legend = None
-chart.y_axis.majorGridlines = None
-chart.varyColors = True
-chart.title = "불량품 구분"
-# chart.x_axis.title = "불량종류"
-# chart.y_axis.title = "불량개수"
+chart1.legend = None
+chart1.y_axis.majorGridlines = None
+chart1.varyColors = True
+chart1.title = "불량품 구분"
+chart1.x_axis.title = "불량종류"
+chart1.y_axis.title = "불량개수"
 
-sheet2.add_chart(chart, "A15")
+data = openpyxl.chart.Reference(sheet2, min_col = 4, min_row = 1, max_row = 10)
+
+chart2 = openpyxl.chart.LineChart()
+chart2.add_data(data = data)
+chart2.y_axis.axId = 200
+
+chart2.y_axis.title = "불량누적률"
+
+chart1.y_axis.crosses = "max"
+chart1 += chart2
+sheet2.add_chart(chart1, "E1")
 
 workbook.save("C:/Users/HSWB/Desktop/edge_detector/failure_find+excel/data1/test.xlsx")
